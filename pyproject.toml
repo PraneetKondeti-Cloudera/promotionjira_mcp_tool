@@ -9,3 +9,9 @@ dependencies = [
     "mcp[cli]>=1.10.1",
     "requests>=2.32.4",
 ]
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project.scripts]
+relengjira = "relengjira.server:main"

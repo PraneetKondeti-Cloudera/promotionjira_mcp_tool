@@ -1,6 +1,7 @@
 from jira import JIRA
 import os
-from constants import *
+from .constants import *
+from datetime import date
 
 class ClouderaJira(object):
     jira = None
@@ -28,7 +29,8 @@ class ClouderaJira(object):
         rpat_release_config = "public_cloud_stage"
         if target_registry == "Prod":
             rpat_release_config = "public_cloud_prod"
-
+        current_date = date.today()
+        formatted_date = current_date.strftime("%Y-%m-%d")
         fields = {
             'project': 'RELENG',
             'issuetype': {
@@ -52,7 +54,8 @@ class ClouderaJira(object):
             PRODUCT: product,
             RELEASE_TYPE: {'value': target_registry},
             PUBLIC_CLOUD: [{'value': "True"}],
-            RPAT_RELEASE_CONFIG: rpat_release_config
+            RPAT_RELEASE_CONFIG: rpat_release_config,
+            "duedate": '{}'.format(formatted_date),
         }
         print(fields)
         issue = self.jira.create_issue(fields)

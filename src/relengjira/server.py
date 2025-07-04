@@ -1,16 +1,14 @@
 from mcp.server.fastmcp import FastMCP
-# import requests
-import jirautil
+from .jirautil import ClouderaJira
+
 # Create an MCP server
 mcp = FastMCP("Releng jira Server")
-
 
 # Add an addition tool
 @mcp.tool()
 def add(a: int, b: int) -> int:
     """Add two numbers"""
     return a + b
-
 
 @mcp.tool()
 def create_releng_promotion_ticket(product: str, build: str, target_registry: str) -> str:
@@ -20,7 +18,7 @@ def create_releng_promotion_ticket(product: str, build: str, target_registry: st
     :param build: The build identifier (e.g., "2.0.53-b125") -  MUST be provided by user, do not assume
     :param target_registry: The target registry (accepts only "Stage" or "Prod") -  MUST be provided by user, do not assume
     """
-    jira = jirautil.ClouderaJira()
+    jira = ClouderaJira()
     issue = jira.create_releng_promotion_ticket(product, build, target_registry)
     return f"Promotion ticket created: {issue}"
 
@@ -34,7 +32,7 @@ def search_jira_issues(search_string: str, project_key: str = None, max_results:
     :param max_results: Max number of issues to return
     :return: List of matching issues (as dicts)
     """
-    jira = jirautil.ClouderaJira()
+    jira = ClouderaJira()
     issues = jira.search_jira_issues(search_string, project_key, max_results)
     return issues
 
@@ -48,13 +46,20 @@ def search_jira_by_assignee(assignee: str, project_key: str = None, max_results:
     :param max_results: Max number of issues to return
     :return: List of matching issues (as dicts)
     """
-    jira = jirautil.ClouderaJira()
+    jira = ClouderaJira()
     issues = jira.search_jira_issues_by_assignee(assignee_username=assignee, project_key=project_key, max_results=max_results)
     return issues
-
 
 # Add a dynamic greeting resource
 @mcp.resource("greeting://{name}")
 def get_greeting(name: str) -> str:
     """Get a personalized greeting"""
     return f"Hello, {name}!"
+
+def main():
+    """Entry point for the MCP server"""
+    # Use FastMCP's run method instead of creating a new Server
+    mcp.run()
+
+if __name__ == "__main__":
+    main()
