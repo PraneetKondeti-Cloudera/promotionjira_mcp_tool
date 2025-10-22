@@ -36,10 +36,12 @@ class ClouderaJira(object):
             'issuetype': {
                 'name': 'Release'
             },
-            'summary': '{prefix_string}Please push {product} {build} images to stage registry'.format(
+            'summary': '{prefix_string}Please push {product} {build} images to {target_registry} registry'.format(
                 prefix_string=PREFIX_STRING,
                 product=product,
-                build=build),
+                build=build,
+                target_registry = target_registry
+            ),
             "components": [
                 {'name': "Releasing"}
             ],
@@ -62,6 +64,82 @@ class ClouderaJira(object):
         print("Promotion ticket for {product} is {ticket}".format(product=product, ticket=str(issue)))
         return str(issue)
 
+    def create_sre_promotion_ticket(self, product, build):
+        fields = {
+            'project': 'SREOPS',
+            'issuetype': {
+                'name': 'Change'
+            },
+            "components": [
+                {
+                    "self": "https://jira.cloudera.com/rest/api/2/component/21884",
+                    "id": "21884",
+                    "name": "promotion"
+                },
+                {
+                    "self": "https://jira.cloudera.com/rest/api/2/component/22218",
+                    "id": "22218",
+                    "name": "target:prod",
+                    "description": "SRE portal component."
+                },
+                {
+                    "self": "https://jira.cloudera.com/rest/api/2/component/22217",
+                    "id": "22217",
+                    "name": "target:stage",
+                    "description": "SRE portal component."
+                }
+            ],
+            'summary': '{prefix_string}CDP Promotion: {product} {build} Stage/Prod Commercial'.format(
+                prefix_string=PREFIX_STRING,
+                product=product,
+                build=build),
+            'description': """
+                        h2. Details
+                        |Reporter|cmlbot|
+                        |Reporter Login|cmlbot@cloudera.com|
+                        |Service|{product}|
+                        |Version|{build}|
+                        |Urgent|No|
+                        |Cluster type|Commercial|
+                        |Cluster tier|Stage/Prod|
+                        |[FedRAMP Significant Changes|https://github.infra.cloudera.com/thunderhead/cloud-services-infra/blob/master/runbooks/security-impact-analysis.md#event-driven-triggers-and-significant-changes]|No|
+                        |Requires Terraform|No|
+                        |Requires generate_helm_configs|No|
+                        |Requires secret changes|No|
+                        |Requires Butler version pinning|No|
+                        |Requires other merges|No|
+                        |Has dependencies|No|
+                        h3. Notes:
+                        h3. Release notes / Change log:
+                        {{noformat}}
+                         {{noformat}}
+                        SRE, please make sure spinnaker pipelines are enabled for the service: [Spinnaker-configuration-file|https://github.infra.cloudera.com/service-delivery/spinnaker/blob/master/spinnaker-helm/flux-cli-tool/spinnaker-projects/cdp/services-configurations.yaml]
+                        ----
+                        Created via SRE-Portal: [https://sre-portal.sd-prod.cloudera.com/]
+                        h3.
+                    """.format(
+                product=product,
+                build=build
+            ),
+            "labels": [
+                "bot-sre-promo",
+                "low-touch",
+                "option:butler_pinning:No",
+                "option:generate_helm_configs:No",
+                "option:has_other_dependencies:No",
+                "option:other_merges_needed:No",
+                "option:secrets_changed:No",
+                "option:significant_changes:No",
+                "option:terraform:No",
+                "promotion",
+                "service:MLX-CRUD-APP",
+                "sre-portal"
+            ],
+        }
+        print(fields)
+        issue = self.jira.create_issue(fields)
+        print("Promotion ticket for {product} is {ticket}".format(product=product, ticket=str(issue)))
+        return str(issue)
 
     def search_jira_issues(self, search_string, project_key=None, max_results=50):
         """

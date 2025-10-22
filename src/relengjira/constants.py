@@ -1,4 +1,4 @@
-PREFIX_STRING = "Test Jira No action please"
+PREFIX_STRING = ""
 
 # Custom fields in jira
 
